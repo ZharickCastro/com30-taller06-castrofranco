@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.encabezado {
+  background: #0f172a;
+  color: #fff;
+  padding: 1.4rem 1rem;
+  text-align: center;
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.encabezado p {
+  margin: .3rem 0 0;
+  color: #cbd5e1;
+  font-size: .9rem;
+}
+
+.contenido {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.2rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

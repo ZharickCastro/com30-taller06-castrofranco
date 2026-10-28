@@ -1,11 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
+import { FormularioOrden } from './components/formulario-orden';
+import { ListadoOrdenes } from './components/listado-ordenes';
 
 @Component({
-  imports: [],
   selector: 'app-root',
-  styleUrl: './app.css',
+  imports: [FormularioOrden, ListadoOrdenes],
   templateUrl: './app.html',
+  styleUrl: './app.css',
 })
-export class App {
-  protected readonly title = signal('com30-taller06-castrofranco');
-}
+export class App {}
