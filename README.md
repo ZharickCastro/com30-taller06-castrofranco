@@ -1,59 +1,48 @@
-# Com30Taller06Castrofranco
+# COM30 · Taller 06 · Órdenes de mantenimiento
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.5.
+Aplicación de una sola pantalla para registrar y gestionar órdenes de mantenimiento de equipos.
+Taller 06 de Programación con Frameworks para Web (IUB, 2026-III), sesiones S05, S06 y S07.
 
-## Development server
+**Escenario elegido:** E4 · Orden de mantenimiento.
 
-To start a local development server, run:
+## Qué hace
 
-```bash
-ng serve
+- Un formulario reactivo captura la orden: equipo, tipo, técnico, correo del técnico, fecha de inicio,
+  fecha de fin, presupuesto y una lista dinámica de tareas (descripción y horas estimadas).
+- El servicio guarda las órdenes en una signal y expone el total y los pendientes.
+- El listado permite cambiar el estado de cada orden (Pendiente, En curso, Terminada), eliminarla y
+  abrir un panel de resumen que se carga con `@defer (on interaction)`.
+
+## Estructura
+
+```
+src/app/
+  models/orden.ts                    interfaces Orden, Tarea y tipos de estado
+  services/orden.service.ts          servicio con la signal privada y asReadonly()
+  validators/validadores.ts          sinSoloEspacios, rangoFechas y minimoItems
+  components/formulario-orden.ts     formulario reactivo con FormArray de tareas
+  components/listado-ordenes.ts      listado con @for, @empty y cambio de estado
+  components/resumen-ordenes.ts      panel de resumen cargado con @defer
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Validación
 
-## Code scaffolding
+- Validadores integrados: `required`, `minLength`, `email`, `pattern` y `min`.
+- Validador propio de control: `sinSoloEspacios` (clave de error `soloEspacios`).
+- Validador de grupo: `rangoFechas` (la fecha de fin no puede ser anterior a la de inicio).
+- Validador del `FormArray`: `minimoItems(1)` exige al menos una tarea.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Cómo ejecutarla
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Requiere Node.js y Angular CLI.
 
 ```bash
-ng build
+npm install
+npx ng serve
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+La aplicación abre en `http://localhost:4200`. Para comprobar que compila:
 
 ```bash
-ng test
+npx ng build
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
