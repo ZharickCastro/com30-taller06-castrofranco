@@ -1,6 +1,7 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { Router } from '@angular/router';
 import { OrdenService, normalizar } from '../services/orden.service';
 import { AbstractControl, FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DESDE, M, PATRON_CODIGO, TOPE } from './parametros';
@@ -79,10 +80,6 @@ import { hastaMayor, multiplo, rango } from './validadores';
 
         <button type="submit">Enviar</button>
       </form>
-
-      @if (aviso()) {
-        <p class="ok">{{ aviso() }}</p>
-      }
     </section>
   `,
   styles: `
@@ -100,7 +97,6 @@ import { hastaMayor, multiplo, rango } from './validadores';
     .listado { margin-top: .5rem; font-size: .85rem; color: #0f172a; }
     .listado .vacio { color: #64748b; }
     button { margin-top: .5rem; background: #1e293b; color: #fff; border-radius: .4rem; padding: .5rem 1rem; font-weight: 700; }
-    .ok { margin-top: 1rem; color: #166534; font-weight: 600; }
   `,
 })
 export class Parcial2 {
@@ -108,6 +104,7 @@ export class Parcial2 {
   readonly tope = TOPE;
 
   private fb = inject(NonNullableFormBuilder);
+  private router = inject(Router);
 
   // NonNullableFormBuilder: al reiniciar, cada control vuelve a su valor
   // inicial y no a null, así ningún campo queda con valor nulo.
@@ -122,8 +119,6 @@ export class Parcial2 {
       { validators: hastaMayor('desde', 'hasta') },
     ),
   });
-
-  aviso = signal('');
 
   // R2 · búsqueda reactiva.
   // trim: valor sin espacios en los extremos · debounceTime(300): se emite
@@ -179,10 +174,11 @@ export class Parcial2 {
     if (this.form.invalid) {
       // Envío inválido: se marcan todos como tocados y aparecen todos los errores.
       this.form.markAllAsTouched();
-      this.aviso.set('');
       return;
     }
+    // R3 · envío válido: el código va como parámetro de ruta y la cantidad
+    // como parámetro de consulta (?cantidad=).
     const { codigo, cantidad } = this.form.getRawValue();
-    this.aviso.set(`Solicitud válida: ${codigo} · ${cantidad}`);
+    this.router.navigate(['/parcial2/detalle', codigo], { queryParams: { cantidad } });
   }
 }
