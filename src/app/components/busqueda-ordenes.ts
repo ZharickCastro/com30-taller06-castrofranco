@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, finalize, map, of, share, switchMap, tap } from 'rxjs';
-import { Orden } from '../models/orden';
+import { debounceTime, distinctUntilChanged, filter, finalize, map, of, share, switchMap, tap } from 'rxjs';
+import { ESTADOS, EstadoOrden, Orden } from '../models/orden';
 import { OrdenService } from '../services/orden.service';
 
 // Búsqueda reactiva /busqueda. Tubería:
@@ -32,8 +32,21 @@ import { OrdenService } from '../services/orden.service';
       }
 
       @if (termino().length >= 2 && !buscando()) {
+        <nav class="filtros">
+          <span>Estado:</span>
+          <button type="button" [class.sel]="filtro() === 'Todos'" (click)="filtro.set('Todos')">
+            Todos ({{ registros().length }})
+          </button>
+          @for (c of conteo(); track c.estado) {
+            <button type="button" [class.sel]="filtro() === c.estado" (click)="filtro.set(c.estado)">
+              {{ c.estado }} ({{ c.cantidad }})
+            </button>
+          }
+        </nav>
+        <p class="mostrando">Mostrando <strong data-testid="total">{{ total() }}</strong> orden(es)</p>
+
         <ul class="resultados">
-          @for (o of registros(); track o.id) {
+          @for (o of visibles(); track o.id) {
             <li>
               <a [routerLink]="['/ordenes', o.codigo]">
                 <span class="codigo">{{ o.codigo }}</span>
@@ -47,6 +60,17 @@ import { OrdenService } from '../services/orden.service';
           }
         </ul>
       }
+
+      <aside class="historial">
+        <h3>Últimas consultas</h3>
+        <ol>
+          @for (h of historial(); track $index) {
+            <li>{{ h }}</li>
+          } @empty {
+            <li class="sin">Todavía no hay consultas.</li>
+          }
+        </ol>
+      </aside>
     </section>
   `,
   styles: `
@@ -66,6 +90,15 @@ import { OrdenService } from '../services/orden.service';
     .estado { justify-self: start; border-radius: 9999px; padding: .1rem .6rem; font-size: .75rem; font-weight: 700; background: #fef3c7; color: #92400e; }
     .estado[data-estado='En curso'] { background: #dbeafe; color: #1e40af; }
     .estado[data-estado='Terminada'] { background: #dcfce7; color: #166534; }
+    .filtros { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; font-size: .85rem; }
+    .filtros span { font-weight: 700; color: #334155; }
+    .filtros button { border: 1px solid #cbd5e1; border-radius: .5rem; padding: .25rem .8rem; background: #fff; color: #334155; }
+    .filtros button.sel { background: #d97706; border-color: #d97706; color: #fff; font-weight: 700; }
+    .mostrando { margin: 0; color: #475569; font-size: .9rem; }
+    .historial { border: 1px dashed #94a3b8; border-radius: .6rem; padding: .7rem 1rem; background: #fff; }
+    .historial h3 { margin: 0 0 .3rem; font-size: .9rem; color: #0f172a; }
+    .historial ol { margin: 0; padding-left: 1.3rem; font-size: .85rem; color: #475569; }
+    .historial .sin { list-style: none; margin-left: -1.3rem; }
     .vacio { text-align: center; color: #92400e; background: #fef3c7; padding: 1.2rem; border-radius: .5rem; }
   `,
 })
@@ -100,4 +133,33 @@ export class BusquedaOrdenes {
 
   /** Resultado de la última consulta, como signal; vacío hasta la primera respuesta. */
   readonly registros = toSignal(this.resultado$, { initialValue: [] as Orden[] });
+
+  /** Filtro por estado: trabaja sobre el resultado en memoria, no consulta al servicio. */
+  readonly filtro = signal<'Todos' | EstadoOrden>('Todos');
+
+  readonly visibles = computed(() => {
+    const f = this.filtro();
+    return f === 'Todos' ? this.registros() : this.registros().filter((o) => o.estado === f);
+  });
+
+  readonly total = computed(() => this.visibles().length);
+
+  readonly conteo = computed(() =>
+    ESTADOS.map((estado) => ({
+      estado,
+      cantidad: this.registros().filter((o) => o.estado === estado).length,
+    })),
+  );
+
+  /** Últimas 5 consultas enviadas al servicio, la más reciente primero. */
+  readonly historial = signal<string[]>([]);
+
+  constructor() {
+    this.termino$
+      .pipe(
+        filter((t) => t.length >= 2),
+        takeUntilDestroyed(), // la suscripción se cancela al destruir el componente
+      )
+      .subscribe((t) => this.historial.update((h) => [t, ...h].slice(0, 5)));
+  }
 }
