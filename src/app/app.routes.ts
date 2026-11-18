@@ -3,6 +3,7 @@ import { ListadoOrdenes } from './components/listado-ordenes';
 import { NoEncontrada } from './components/no-encontrada';
 import { DetalleOrden } from './components/detalle-orden';
 import { FormularioOrden } from './components/formulario-orden';
+import { BusquedaOrdenes } from './components/busqueda-ordenes';
 
 // El enrutador recorre la lista de arriba abajo y se queda con la primera coincidencia:
 // 'ordenes/nueva' va antes de 'ordenes/:id' (si no, «nueva» se leería como un código)
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: 'ordenes', component: ListadoOrdenes, title: 'Órdenes de mantenimiento' },
   { path: 'ordenes/nueva', component: FormularioOrden, title: 'Nueva orden' },
   { path: 'ordenes/:id', component: DetalleOrden, title: 'Detalle de la orden' },
+  { path: 'busqueda', component: BusquedaOrdenes, title: 'Buscar órdenes' },
   {
     path: 'estadisticas',
     title: 'Estadísticas',
