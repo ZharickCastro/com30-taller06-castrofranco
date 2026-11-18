@@ -4,6 +4,7 @@ import { NoEncontrada } from './components/no-encontrada';
 import { DetalleOrden } from './components/detalle-orden';
 import { FormularioOrden } from './components/formulario-orden';
 import { BusquedaOrdenes } from './components/busqueda-ordenes';
+import { Parcial2 } from './parcial2/parcial2';
 
 // El enrutador recorre la lista de arriba abajo y se queda con la primera coincidencia:
 // 'ordenes/nueva' va antes de 'ordenes/:id' (si no, «nueva» se leería como un código)
@@ -21,5 +22,6 @@ export const routes: Routes = [
     // en un chunk aparte la primera vez que se entra a /estadisticas.
     loadComponent: () => import('./components/resumen-ordenes').then((m) => m.ResumenOrdenes),
   },
+  { path: 'parcial2', component: Parcial2, title: 'Parcial 2 · Solicitud' },
   { path: '**', component: NoEncontrada, title: 'Página no encontrada' },
 ];
