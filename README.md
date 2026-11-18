@@ -22,7 +22,10 @@ src/app/
   validators/validadores.ts          sinSoloEspacios, rangoFechas y minimoItems
   components/formulario-orden.ts     formulario reactivo con FormArray de tareas
   components/listado-ordenes.ts      listado con @for, @empty y cambio de estado
-  components/resumen-ordenes.ts      panel de resumen cargado con @defer
+  components/resumen-ordenes.ts      vista de estadísticas (carga diferida con loadComponent)
+  components/detalle-orden.ts        detalle /ordenes/:id
+  components/no-encontrada.ts        vista 404 (comodín **)
+  app.routes.ts                      mapa de rutas
 ```
 
 ## Validación
@@ -46,3 +49,29 @@ La aplicación abre en `http://localhost:4200`. Para comprobar que compila:
 ```bash
 npx ng build
 ```
+
+## Taller 08 · Rutas y navegación
+
+El proyecto del Taller 06 se amplía con rutas (Angular Router). Los datos siguen en el servicio con
+signal; el servicio arranca con 12 órdenes de ejemplo (OM01 a OM12: Pendiente 5, En curso 4, Terminada 3).
+
+### Tabla de rutas (en el orden de `app.routes.ts`)
+
+| Ruta | Vista (componente) | Parámetro o carga |
+| --- | --- | --- |
+| `/` | — | Redirige a `/ordenes` (`pathMatch: 'full'`) |
+| `/ordenes` | `ListadoOrdenes` | Parámetro de consulta `?estado=` → `input()` `estado` |
+| `/ordenes/nueva` | `FormularioOrden` | Al guardar, `router.navigate(['/ordenes', codigo])` |
+| `/ordenes/:id` | `DetalleOrden` | Parámetro de ruta `:id` → `input.required()` `id` |
+| `/estadisticas` | `ResumenOrdenes` | Carga diferida con `loadComponent` |
+| `**` | `NoEncontrada` | Comodín, siempre al final (vista 404) |
+
+`/ordenes/nueva` va antes de `/ordenes/:id`; en el orden contrario «nueva» se leería como un código.
+`provideRouter(routes, withComponentInputBinding())` en `app.config.ts` entrega los parámetros a los `input()`.
+
+### Pruebas rápidas
+
+- `/ordenes?estado=Pendiente` → 5 órdenes; F5 conserva el filtro.
+- `/ordenes?estado=Cancelada` → mensaje de lista vacía (`@empty`).
+- `/ordenes/OM05` → detalle de la orden; `/ordenes/OM99` → «No existe la orden OM99».
+- `/reportes` → vista 404 con la dirección y un enlace al listado.
