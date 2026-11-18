@@ -23,6 +23,7 @@ src/app/
   components/formulario-orden.ts     formulario reactivo con FormArray de tareas
   components/listado-ordenes.ts      listado con @for, @empty y cambio de estado
   components/resumen-ordenes.ts      vista de estadísticas (carga diferida con loadComponent)
+  components/busqueda-ordenes.ts     búsqueda reactiva (Taller 07)
   components/detalle-orden.ts        detalle /ordenes/:id
   components/no-encontrada.ts        vista 404 (comodín **)
   app.routes.ts                      mapa de rutas
@@ -50,6 +51,21 @@ La aplicación abre en `http://localhost:4200`. Para comprobar que compila:
 npx ng build
 ```
 
+## Taller 07 · Búsqueda reactiva
+
+Vista `/busqueda` (menú «Búsqueda»). El texto se busca, sin tildes ni mayúsculas y recortado con `trim()`,
+en dos campos de la orden: **equipo** y **técnico**. Con menos de 2 caracteres no se consulta.
+
+- Servicio (`orden.service.ts`): `buscar(texto)` devuelve un `Observable` con un retardo simulado de
+  `max(150, 1500 − 300 × longitud)` ms y suma 1 a la signal `llamadas` (privada, expuesta con `asReadonly()`).
+- Componente (`busqueda-ordenes.ts`): `valueChanges` → `map(trim)` → `debounceTime(300)` →
+  `distinctUntilChanged()` → `switchMap` (con `of([])` bajo 2 caracteres). El resultado se expone con
+  `toSignal(..., { initialValue: [] })`; el filtro por estado es una signal y un `computed`, y no consulta.
+- Historial de las 5 últimas consultas con `subscribe` y `takeUntilDestroyed()`.
+
+Pruebas rápidas: «perez» → 3 órdenes (OM01, OM05, OM09); «turbina» → «Sin coincidencias»;
+«x» → mensaje de mínimo 2 caracteres, sin consulta.
+
 ## Taller 08 · Rutas y navegación
 
 El proyecto del Taller 06 se amplía con rutas (Angular Router). Los datos siguen en el servicio con
@@ -63,6 +79,7 @@ signal; el servicio arranca con 12 órdenes de ejemplo (OM01 a OM12: Pendiente 5
 | `/ordenes` | `ListadoOrdenes` | Parámetro de consulta `?estado=` → `input()` `estado` |
 | `/ordenes/nueva` | `FormularioOrden` | Al guardar, `router.navigate(['/ordenes', codigo])` |
 | `/ordenes/:id` | `DetalleOrden` | Parámetro de ruta `:id` → `input.required()` `id` |
+| `/busqueda` | `BusquedaOrdenes` | Búsqueda reactiva del Taller 07 |
 | `/estadisticas` | `ResumenOrdenes` | Carga diferida con `loadComponent` |
 | `**` | `NoEncontrada` | Comodín, siempre al final (vista 404) |
 
