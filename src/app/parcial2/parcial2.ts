@@ -1,5 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
-import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { OrdenService, normalizar } from '../services/orden.service';
+import { AbstractControl, FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DESDE, M, PATRON_CODIGO, TOPE } from './parametros';
 import { hastaMayor, multiplo, rango } from './validadores';
 
@@ -10,6 +13,22 @@ import { hastaMayor, multiplo, rango } from './validadores';
     <section class="parcial">
       <h1>Parcial 2 · Solicitud</h1>
       <p class="params">m = {{ m }} · tope = {{ tope }}</p>
+
+      <div class="buscar">
+        <label>
+          Buscar
+          <input [formControl]="buscar" placeholder="Equipo o técnico" autocomplete="off" />
+        </label>
+        <p>Último valor: «{{ ultimo() }}»</p>
+        <p>Emisiones: {{ emisiones() }}</p>
+        <ul class="listado">
+          @for (o of filtrados(); track o.id) {
+            <li>{{ o.codigo }} · {{ o.equipo }} · {{ o.tecnico }}</li>
+          } @empty {
+            <li class="vacio">Ninguna orden coincide con «{{ ultimo() }}»</li>
+          }
+        </ul>
+      </div>
 
       <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
         <label>
@@ -76,6 +95,10 @@ import { hastaMayor, multiplo, rango } from './validadores';
     .periodo { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
     .error { color: #b91c1c; font-size: .8rem; margin: 0; }
     .error small { color: #94a3b8; }
+    .buscar { margin-bottom: 1.5rem; padding: .8rem; border: 1px solid #e2e8f0; border-radius: .5rem; background: #fff; max-width: 24rem; }
+    .buscar p { font-size: .85rem; color: #334155; margin: .3rem 0 0; }
+    .listado { margin-top: .5rem; font-size: .85rem; color: #0f172a; }
+    .listado .vacio { color: #64748b; }
     button { margin-top: .5rem; background: #1e293b; color: #fff; border-radius: .4rem; padding: .5rem 1rem; font-weight: 700; }
     .ok { margin-top: 1rem; color: #166534; font-weight: 600; }
   `,
@@ -101,6 +124,39 @@ export class Parcial2 {
   });
 
   aviso = signal('');
+
+  // R2 · búsqueda reactiva.
+  // trim: valor sin espacios en los extremos · debounceTime(300): se emite
+  // solo tras 300 ms sin escribir · distinctUntilChanged: nunca igual al
+  // emitido inmediatamente antes. takeUntilDestroyed limpia la suscripción.
+  buscar = new FormControl('', { nonNullable: true });
+  ultimo = signal('');
+  emisiones = signal(0);
+
+  private servicio = inject(OrdenService);
+
+  // El listado de órdenes se filtra con el último valor emitido (equipo o técnico).
+  // filter produce un arreglo nuevo; la lista del servicio no se modifica.
+  filtrados = computed(() => {
+    const texto = normalizar(this.ultimo());
+    return this.servicio
+      .ordenes()
+      .filter((o) => normalizar(o.equipo).includes(texto) || normalizar(o.tecnico).includes(texto));
+  });
+
+  constructor() {
+    this.buscar.valueChanges
+      .pipe(
+        map((texto) => texto.trim()),
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(inject(DestroyRef)),
+      )
+      .subscribe((valor) => {
+        this.ultimo.set(valor);
+        this.emisiones.update((n) => n + 1);
+      });
+  }
 
   /** Un error se muestra solo cuando el usuario tocó o modificó el campo. */
   mostrar(control: AbstractControl): boolean {
