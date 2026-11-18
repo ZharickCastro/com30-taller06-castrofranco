@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { OrdenService } from '../services/orden.service';
 import { minimoItems, rangoFechas, sinSoloEspacios } from '../validators/validadores';
 
@@ -134,6 +135,7 @@ import { minimoItems, rangoFechas, sinSoloEspacios } from '../validators/validad
 export class FormularioOrden {
   private readonly fb = inject(FormBuilder);
   private readonly servicio = inject(OrdenService);
+  private readonly router = inject(Router);
 
   readonly tipos = ['Preventivo', 'Correctivo', 'Predictivo'];
 
@@ -201,9 +203,9 @@ export class FormularioOrden {
       this.form.markAllAsTouched();
       return;
     }
-    this.servicio.agregar(this.form.getRawValue());
-    this.tareas.clear();
+    const codigo = this.servicio.agregar(this.form.getRawValue());
     this.form.reset();
-    this.agregarTarea();
+    // Navegación programática: la URL se decide en el código, con el código de la orden nueva.
+    this.router.navigate(['/ordenes', codigo]);
   }
 }

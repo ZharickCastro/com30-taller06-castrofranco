@@ -8,7 +8,7 @@ import { OrdenService } from '../services/orden.service';
   imports: [CurrencyPipe],
   template: `
     <aside class="resumen">
-      <h3>Resumen de órdenes</h3>
+      <h2>Estadísticas de las órdenes</h2>
       <ul class="estados">
         @for (p of porEstado(); track p.estado) {
           <li>
@@ -25,8 +25,8 @@ import { OrdenService } from '../services/orden.service';
     </aside>
   `,
   styles: `
-    .resumen { border: 1px solid #1e293b; border-radius: .6rem; padding: .9rem 1.1rem; background: #f1f5f9; margin-bottom: 1rem; }
-    h3 { margin: 0 0 .5rem; font-size: 1rem; font-weight: 800; color: #0f172a; }
+    .resumen { border: 1px solid #1e293b; border-radius: .6rem; padding: .9rem 1.1rem; background: #f1f5f9; }
+    h2 { margin: 0 0 .7rem; font-size: 1.25rem; font-weight: 800; color: #0f172a; }
     .estados { list-style: none; display: flex; gap: .8rem; padding: 0; margin: 0 0 .5rem; flex-wrap: wrap; }
     .estados li { background: #fff; border-radius: .4rem; padding: .3rem .8rem; display: flex; gap: .5rem; align-items: baseline; }
     p { margin: .2rem 0; font-size: .9rem; color: #334155; }
