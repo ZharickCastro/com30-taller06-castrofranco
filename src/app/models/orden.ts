@@ -9,6 +9,7 @@ export interface Tarea {
 
 export interface Orden {
   id: number;
+  codigo: string;
   equipo: string;
   tipo: string;
   tecnico: string;
@@ -20,4 +21,4 @@ export interface Orden {
   estado: EstadoOrden;
 }
 
-export type NuevaOrden = Omit<Orden, 'id' | 'estado'>;
+export type NuevaOrden = Omit<Orden, 'id' | 'codigo' | 'estado'>;

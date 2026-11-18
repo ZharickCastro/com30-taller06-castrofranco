@@ -1,9 +1,13 @@
 <header class="encabezado">
   <h1>Órdenes de mantenimiento</h1>
   <p>Registro y seguimiento de las órdenes de mantenimiento de equipos</p>
+
+  <nav class="menu">
+    <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+    <a routerLink="/ordenes" routerLinkActive="activo">Órdenes</a>
+  </nav>
 </header>
 
 <main class="contenido">
-  <app-formulario-orden />
-  <app-listado-ordenes />
+  <router-outlet />
 </main>

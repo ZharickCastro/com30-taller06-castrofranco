@@ -33,3 +33,31 @@
   flex-direction: column;
   gap: 1.5rem;
 }
+
+.menu {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.menu a {
+  border: 1px solid #475569;
+  border-radius: 9999px;
+  padding: .35rem 1rem;
+  color: #e2e8f0;
+  font-size: .85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.menu a:hover {
+  border-color: #fbbf24;
+}
+
+.menu a.activo {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  color: #0f172a;
+}

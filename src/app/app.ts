@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { FormularioOrden } from './components/formulario-orden';
-import { ListadoOrdenes } from './components/listado-ordenes';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [FormularioOrden, ListadoOrdenes],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
